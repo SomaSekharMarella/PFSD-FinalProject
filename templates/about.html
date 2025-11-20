@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1 class="card-title">About OPBMS</h1>
+    </div>
+    <p class="page-lead">Online Payment and Billing Management System</p>
+
+    <div class="info-grid">
+        <div class="info-card">
+            <h3 class="section-title">System Overview</h3>
+            <p>OPBMS centralises bill assignments, simulated payments, and recurring subscriptions for service providers and their customers.</p>
+        </div>
+        <div class="info-card">
+            <h3 class="section-title">Key Objectives</h3>
+            <ul class="bullet-list">
+                <li>Efficient bill creation and tracking</li>
+                <li>Automated monthly subscription renewals</li>
+                <li>Transparent spending analytics</li>
+                <li>Seamless profile and account management</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="info-grid roles-grid">
+        <div class="info-card">
+            <h4 class="role-title">👨‍💼 Admin</h4>
+            <p>Create customer accounts, assign bills, and manage subscriptions.</p>
+        </div>
+        <div class="info-card">
+            <h4 class="role-title">👤 Customer</h4>
+            <p>Review pending bills, simulate payments, and monitor spending.</p>
+        </div>
+        <div class="info-card">
+            <h4 class="role-title">📈 Analytics</h4>
+            <p>Visualise payment history with charts for better budgeting.</p>
+        </div>
+    </div>
+
+    <div class="card-actions">
+        <a href="{% url 'login' %}" class="btn btn-primary">Get Started</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+    </div>
+</div>
+{% endblock %}

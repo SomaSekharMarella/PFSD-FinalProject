@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}New Subscription · OPBMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Create Subscription</h1>
+    <p>Setup a recurring monthly charge for a customer. Bills auto-generate on each renewal date.</p>
+</div>
+
+<div class="card">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Customer</label>
+                {{ form.user }}
+                {{ form.user.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Subscription Name</label>
+                {{ form.name }}
+                {{ form.name.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Amount (₹)</label>
+                {{ form.amount }}
+                {{ form.amount.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Bill Type</label>
+                {{ form.bill_type }}
+                {{ form.bill_type.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label">Next Renewal Date</label>
+                {{ form.next_renewal_date }}
+                {{ form.next_renewal_date.errors }}
+            </div>
+            <div class="form-group form-group--span">
+                <label class="form-label">Notes</label>
+                {{ form.notes }}
+                {{ form.notes.errors }}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'adminportal:customer_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Subscription</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

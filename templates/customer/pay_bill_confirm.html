@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Pay {{ bill.title }} · OPBMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Simulate Payment</h1>
+    <p>Confirm that you want to mark this bill as paid. No real transaction will occur.</p>
+</div>
+
+<div class="card">
+    <dl class="definition-list">
+        <div>
+            <dt>Bill</dt>
+            <dd>{{ bill.title }}</dd>
+        </div>
+        <div>
+            <dt>Due Date</dt>
+            <dd>{{ bill.due_date }}</dd>
+        </div>
+        <div>
+            <dt>Amount</dt>
+            <dd>₹ {{ bill.amount }}</dd>
+        </div>
+        <div>
+            <dt>Status</dt>
+            <dd>{{ bill.get_status_display }}</dd>
+        </div>
+    </dl>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-actions">
+            <a href="{% url 'customerportal:dashboard' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Mark as Paid</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

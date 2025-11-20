@@ -1,0 +1,1 @@
+"""Admin app does not expose standalone models in Django admin."""

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment History · OPBMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Payment History</h1>
+    <p>Review your simulated payments and download details from the Django admin if needed.</p>
+</div>
+
+<div class="card">
+    <div class="status-summary">
+        <div class="status-pill">
+            ✅ Successful Payments: {{ success_count }}
+        </div>
+        <div class="status-pill warning">
+            ⚠️ Failed Attempts: {{ failed_count }}
+        </div>
+        <div class="status-pill">
+            💰 Total Paid: ₹ {{ total_amount|floatformat:2 }}
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Bill</th>
+                    <th>Amount (₹)</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                <tr>
+                    <td>{{ txn.payment_date|date:'d M Y H:i' }}</td>
+                    <td>{{ txn.bill.title }}</td>
+                    <td>{{ txn.amount }}</td>
+                    <td>{{ txn.method }}</td>
+                    <td>
+                        {% if txn.status == 'success' %}
+                            <span class="tag tag-success">{{ txn.get_status_display }}</span>
+                        {% else %}
+                            <span class="tag tag-warning">{{ txn.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">No payments have been made yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

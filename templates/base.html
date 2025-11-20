@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Online Payment and Billing Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if not hide_navbar %}
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="{% url 'home' %}" class="logo">💳 OPBMS</a>
+            <ul class="nav-links">
+                {% if request.user.is_authenticated %}
+                    {% if request.user.is_staff %}
+                        <li><a href="{% url 'adminportal:dashboard' %}">Admin Dashboard</a></li>
+                        <li><a href="{% url 'adminportal:customer_list' %}">Customers</a></li>
+                        <li><a href="{% url 'adminportal:bill_create' %}">Assign Bill</a></li>
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% else %}
+                        <li><a href="{% url 'customerportal:dashboard' %}">Dashboard</a></li>
+                        <li><a href="{% url 'customerportal:subscriptions' %}">Subscriptions</a></li>
+                        <li><a href="{% url 'customerportal:payment_history' %}">Payments</a></li>
+                        <li><a href="{% url 'customerportal:profile' %}">Profile</a></li>
+                        <li><a href="{% url 'logout' %}">Logout</a></li>
+                    {% endif %}
+                {% else %}
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'about' %}">About</a></li>
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'contact' %}">Contact</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} fade-in">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+    
+    <footer class="footer">
+        <p>&copy; 2025 Online Payment and Billing Management System. All rights reserved.</p>
+    </footer>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

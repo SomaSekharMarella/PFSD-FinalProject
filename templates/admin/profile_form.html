@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile · {{ customer.username }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Edit Profile for {{ customer.username }}</h1>
+    <p>Update contact information for this customer.</p>
+</div>
+
+<div class="card">
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label" for="id_full_name">Full Name</label>
+                {{ form.full_name }}
+                {{ form.full_name.errors }}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_phone">Phone</label>
+                {{ form.phone }}
+                {{ form.phone.errors }}
+            </div>
+            <div class="form-group form-group--span">
+                <label class="form-label" for="id_address">Address</label>
+                {{ form.address }}
+                {{ form.address.errors }}
+            </div>
+        </div>
+        <div class="form-actions">
+            <a href="{% url 'adminportal:customer_detail' customer.id %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

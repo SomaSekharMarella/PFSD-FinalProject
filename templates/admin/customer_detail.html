@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer · {{ customer.username }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Customer: {{ customer.username }}</h1>
+        <p>{{ customer.profile.full_name|default:'No profile name' }} · {{ customer.profile.phone|default:'No phone' }}</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'adminportal:profile_update' customer.id %}" class="btn btn-secondary">Edit Profile</a>
+        <a href="{% url 'adminportal:bill_create' %}?user={{ customer.id }}" class="btn btn-primary">Assign Bill</a>
+        <a href="{% url 'adminportal:subscription_create' %}?user={{ customer.id }}" class="btn btn-primary">New Subscription</a>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Bills</h2>
+        </div>
+        {% if bills %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Due Date</th>
+                        <th>Amount (₹)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in bills %}
+                    <tr>
+                        <td>{{ bill.title }}</td>
+                        <td>{{ bill.get_bill_type_display }}</td>
+                        <td>{{ bill.due_date }}</td>
+                        <td>{{ bill.amount }}</td>
+                        <td>
+                            {% if bill.status == 'paid' %}
+                                <span class="tag tag-success">Paid</span>
+                            {% else %}
+                                <span class="tag tag-warning">Unpaid</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="empty-title">No bills yet</p>
+            <p class="empty-copy">Assign a bill to {{ customer.profile.full_name|default:customer.username }} to get started.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Subscriptions</h2>
+        </div>
+        {% if subscriptions %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Next Renewal</th>
+                        <th>Amount (₹)</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subscription in subscriptions %}
+                    <tr>
+                        <td>{{ subscription.name }}</td>
+                        <td>{{ subscription.get_bill_type_display }}</td>
+                        <td>{{ subscription.next_renewal_date }}</td>
+                        <td>{{ subscription.amount }}</td>
+                        <td>
+                            {% if subscription.active %}
+                                <span class="tag tag-success">Active</span>
+                            {% else %}
+                                <span class="tag">Paused</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <a href="{% url 'adminportal:subscription_toggle' subscription.id %}" class="btn btn-link">Toggle</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="empty-title">No subscriptions</p>
+            <p class="empty-copy">Add a recurring subscription to automate monthly billing.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Recent Transactions</h2>
+    </div>
+    {% if transactions %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Bill</th>
+                    <th>Amount (₹)</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                <tr>
+                    <td>{{ txn.payment_date|date:'d M Y H:i' }}</td>
+                    <td>{{ txn.bill.title }}</td>
+                    <td>{{ txn.amount }}</td>
+                    <td>{{ txn.method }}</td>
+                    <td>
+                        {% if txn.status == 'success' %}
+                            <span class="tag tag-success">{{ txn.get_status_display }}</span>
+                        {% else %}
+                            <span class="tag tag-warning">{{ txn.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-title">No payments yet</p>
+        <p class="empty-copy">Transactions will appear here after the customer records payments.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

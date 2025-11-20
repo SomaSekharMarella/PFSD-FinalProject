@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Customers · OPBMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Customers</h1>
+    <div class="actions">
+        <a href="{% url 'adminportal:customer_create' %}" class="btn btn-primary">Create Customer</a>
+        <a href="{% url 'adminportal:bill_create' %}" class="btn btn-secondary">Assign Bill</a>
+        <a href="{% url 'adminportal:subscription_create' %}" class="btn btn-secondary">New Subscription</a>
+    </div>
+</div>
+
+<div class="card">
+    {% if customers %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Phone</th>
+                    <th>Pending Bills</th>
+                    <th>Outstanding (₹)</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td>{{ customer.username }}</td>
+                    <td>{{ customer.profile.full_name|default:'—' }}</td>
+                    <td>{{ customer.profile.phone|default:'—' }}</td>
+                    <td>{{ customer.unpaid_bills|default:0 }}</td>
+                    <td>{{ customer.total_due|default:0|floatformat:2 }}</td>
+                    <td class="text-right">
+                        <a class="btn btn-link" href="{% url 'adminportal:customer_detail' customer.id %}">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-title">No customers yet</p>
+        <p class="empty-copy">Create a customer to start assigning bills and subscriptions.</p>
+        <a href="{% url 'adminportal:customer_create' %}" class="btn btn-primary">Create your first customer</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

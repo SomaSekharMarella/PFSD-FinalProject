@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block title %}My Dashboard · OPBMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Welcome, {{ request.user.profile.full_name|default:request.user.username }}</h1>
+    <p>Track your upcoming bills, payments, and subscriptions.</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="metric-card">
+        <span class="metric-icon">💳</span>
+        <div class="metric-content">
+            <span class="metric-label">Total Paid</span>
+            <span class="metric-value">₹ {{ total_paid|floatformat:2 }}</span>
+        </div>
+    </div>
+    <div class="metric-card">
+        <span class="metric-icon">📉</span>
+        <div class="metric-content">
+            <span class="metric-label">Outstanding</span>
+            <span class="metric-value">₹ {{ total_pending|floatformat:2 }}</span>
+        </div>
+    </div>
+    <div class="metric-card">
+        <span class="metric-icon">🧾</span>
+        <div class="metric-content">
+            <span class="metric-label">Pending Bills</span>
+            <span class="metric-value">{{ pending_bills|length }}</span>
+        </div>
+    </div>
+    <div class="metric-card">
+        <span class="metric-icon">🔁</span>
+        <div class="metric-content">
+            <span class="metric-label">Active Subscriptions</span>
+            <span class="metric-value">{{ active_subscription_count }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="card quick-actions">
+    <div class="card-header">
+        <h2 class="card-title">Quick Actions</h2>
+    </div>
+    <div class="quick-actions">
+        <a href="{% url 'customerportal:subscriptions' %}" class="btn btn-secondary">🔍 View Subscriptions</a>
+        <a href="{% url 'customerportal:subscription_create' %}" class="btn btn-primary">➕ Add Subscription</a>
+        <a href="{% url 'customerportal:payment_history' %}" class="btn btn-secondary">📒 Payment History</a>
+        <a href="{% url 'customerportal:profile' %}" class="btn btn-secondary">👤 Update Profile</a>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Pending Bills</h2>
+        </div>
+        {% if pending_bills %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Due Date</th>
+                        <th>Amount (₹)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in pending_bills %}
+                    <tr class="{% if bill.id in due_soon_ids %}due-soon{% endif %}">
+                        <td>{{ bill.title }}</td>
+                        <td>{{ bill.get_bill_type_display }}</td>
+                        <td>{{ bill.due_date }}</td>
+                        <td>{{ bill.amount }}</td>
+                        <td class="text-right">
+                            <a class="btn btn-link" href="{% url 'customerportal:pay_bill' bill.id %}">Pay</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="empty-title">You're all caught up</p>
+            <p class="empty-copy">No pending bills at the moment. Great job staying on track!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Recent Payments</h2>
+            <a href="{% url 'customerportal:payment_history' %}" class="btn btn-secondary">View History</a>
+        </div>
+        {% if recent_transactions %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Bill</th>
+                        <th>Amount (₹)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in recent_transactions %}
+                    <tr>
+                        <td>{{ txn.payment_date|date:'d M Y H:i' }}</td>
+                        <td>{{ txn.bill.title }}</td>
+                        <td>{{ txn.amount }}</td>
+                        <td>
+                            {% if txn.status == 'success' %}
+                                <span class="tag tag-success">{{ txn.get_status_display }}</span>
+                            {% else %}
+                                <span class="tag tag-warning">{{ txn.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="empty-title">No transactions yet</p>
+            <p class="empty-copy">Your recent payments will appear here once you start paying bills.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if due_soon_bills %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Due Within 7 Days</h2>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Bill</th>
+                    <th>Due Date</th>
+                    <th>Amount (₹)</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in due_soon_bills %}
+                <tr>
+                    <td>{{ bill.title }}</td>
+                    <td>{{ bill.due_date }}</td>
+                    <td>{{ bill.amount }}</td>
+                    <td class="text-right">
+                        <a class="btn btn-link" href="{% url 'customerportal:pay_bill' bill.id %}">Pay Now</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Monthly Spend</h2>
+        </div>
+        <div class="card-body">
+            <canvas id="spendBarChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Spend by Category</h2>
+        </div>
+        <div class="card-body">
+            <canvas id="spendPieChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Subscriptions</h2>
+            <a href="{% url 'customerportal:subscription_create' %}" class="btn btn-primary">Add Subscription</a>
+        </div>
+        {% if subscriptions %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Next Renewal</th>
+                        <th>Amount (₹)</th>
+                        <th>Status</th>
+                        <th>Created By</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subscription in subscriptions %}
+                    <tr>
+                        <td>{{ subscription.name }}</td>
+                        <td>{{ subscription.get_bill_type_display }}</td>
+                        <td>{{ subscription.next_renewal_date }}</td>
+                        <td>{{ subscription.amount }}</td>
+                        <td>
+                            {% if subscription.active %}
+                                <span class="tag tag-success">Active</span>
+                            {% else %}
+                                <span class="tag">Paused</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ subscription.get_created_by_role_display }}</td>
+                        <td class="text-right">
+                            <a class="btn btn-link" href="{% url 'customerportal:subscription_toggle' subscription.id %}">Toggle</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p class="empty-title">No subscriptions</p>
+            <p class="empty-copy">Set up a recurring payment to track it here every month.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if recent_paid_bills %}
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Recently Paid Bills</h2>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Bill</th>
+                        <th>Amount (₹)</th>
+                        <th>Paid On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in recent_paid_bills %}
+                    <tr>
+                        <td>{{ bill.title }}</td>
+                        <td>{{ bill.amount }}</td>
+                        <td>{{ bill.paid_at|date:'d M Y H:i' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const monthly = {{ monthly_data|safe }};
+    const category = {{ category_data|safe }};
+
+    const barCtx = document.getElementById('spendBarChart');
+    if (barCtx && monthly.labels.length) {
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: monthly.labels,
+                datasets: [{
+                    label: 'Monthly Spend',
+                    data: monthly.values,
+                    backgroundColor: '#1f8a70'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    const pieCtx = document.getElementById('spendPieChart');
+    if (pieCtx && category.labels.length) {
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: category.labels,
+                datasets: [{
+                    data: category.values,
+                    backgroundColor: ['#1f8a70', '#f6ae2d', '#e4572e', '#2ec4b6', '#16324f', '#9b5de5']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+</script>
+{% endblock %}
+

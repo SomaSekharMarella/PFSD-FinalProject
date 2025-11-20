@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero card">
+    <div class="card-header">
+        <h1 class="card-title text-center">Online Payment &amp; Billing Management</h1>
+    </div>
+    <div class="hero-body">
+        <p class="lead">Centralise customer billing, track recurring subscriptions, and simulate secure payments in one place.</p>
+        <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Access Your Dashboard</a>
+    </div>
+</div>
+
+<section class="features-grid">
+    <div class="feature-card">
+        <div class="stat-icon">🧑‍💼</div>
+        <h3>Admin Workspace</h3>
+        <p>Create customer accounts, assign one-time bills, and set up monthly subscriptions with automated renewals.</p>
+    </div>
+    <div class="feature-card">
+        <div class="stat-icon">👥</div>
+        <h3>Customer Dashboard</h3>
+        <p>Customers review upcoming bills, simulate payments, manage their own subscriptions, and update their profile.</p>
+    </div>
+    <div class="feature-card">
+        <div class="stat-icon">📊</div>
+        <h3>Spending Analytics</h3>
+        <p>Interactive bar and pie charts highlight monthly spending trends and category-wise distribution.</p>
+    </div>
+    <div class="feature-card">
+        <div class="stat-icon">🔁</div>
+        <h3>Auto Renewals</h3>
+        <p>Recurring bills regenerate every month until they are paused, making OTT plans and donations effortless.</p>
+    </div>
+</section>
+
+<section class="cta card">
+    <h2>Why choose OPBMS?</h2>
+    <ul class="cta-list">
+        <li><strong>No real payment gateway:</strong> simulate payments safely for demos and academic projects.</li>
+        <li><strong>Django powered:</strong> built on robust authentication with extensible models.</li>
+        <li><strong>Ready for SQLite or PostgreSQL:</strong> switch databases with a single configuration change.</li>
+    </ul>
+    <p class="note">Login credentials are managed by admins. Ask your administrator to create your account.</p>
+</section>
+{% endblock %}

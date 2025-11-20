@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}My Subscriptions · OPBMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>My Subscriptions</h1>
+    <div class="actions">
+        <a href="{% url 'customerportal:subscription_create' %}" class="btn btn-primary">Add Subscription</a>
+    </div>
+</div>
+
+<div class="card">
+    {% if subscriptions %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Next Renewal</th>
+                    <th>Amount (₹)</th>
+                    <th>Status</th>
+                    <th>Created By</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subscription in subscriptions %}
+                <tr>
+                    <td>{{ subscription.name }}</td>
+                    <td>{{ subscription.get_bill_type_display }}</td>
+                    <td>{{ subscription.next_renewal_date }}</td>
+                    <td>{{ subscription.amount }}</td>
+                    <td>
+                        {% if subscription.active %}
+                            <span class="tag tag-success">Active</span>
+                        {% else %}
+                            <span class="tag">Paused</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ subscription.get_created_by_role_display }}</td>
+                    <td class="text-right"><a href="{% url 'customerportal:subscription_toggle' subscription.id %}" class="btn btn-link">Toggle</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-title">No subscriptions created</p>
+        <p class="empty-copy">Add a subscription to automatically track monthly payments.</p>
+        <a href="{% url 'customerportal:subscription_create' %}" class="btn btn-primary">Create subscription</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

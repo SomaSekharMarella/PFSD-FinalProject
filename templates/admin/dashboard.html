@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard · OPBMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p>Monitor customer payments, outstanding bills, and subscription activity.</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="metric-card">
+        <span class="metric-icon">👥</span>
+        <div class="metric-content">
+            <span class="metric-label">Customers</span>
+            <span class="metric-value">{{ total_customers }}</span>
+        </div>
+    </div>
+    <div class="metric-card">
+        <span class="metric-icon">🧾</span>
+        <div class="metric-content">
+            <span class="metric-label">Pending Bills</span>
+            <span class="metric-value">{{ pending_bills_count }}</span>
+        </div>
+    </div>
+    <div class="metric-card">
+        <span class="metric-icon">💸</span>
+        <div class="metric-content">
+            <span class="metric-label">Outstanding (₹)</span>
+            <span class="metric-value">{{ total_outstanding|floatformat:2 }}</span>
+        </div>
+    </div>
+    <div class="metric-card">
+        <span class="metric-icon">✅</span>
+        <div class="metric-content">
+            <span class="metric-label">Total Paid (₹)</span>
+            <span class="metric-value">{{ total_paid|floatformat:2 }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Open Bills</h2>
+        <a href="{% url 'adminportal:bill_create' %}" class="btn btn-secondary">Assign New Bill</a>
+    </div>
+    {% if open_bills %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Due Date</th>
+                    <th>Amount (₹)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in open_bills %}
+                <tr>
+                    <td><a href="{% url 'adminportal:customer_detail' bill.user.id %}">{{ bill.user.username }}</a></td>
+                    <td>{{ bill.title }}</td>
+                    <td>{{ bill.get_bill_type_display }}</td>
+                    <td>{{ bill.due_date }}</td>
+                    <td>{{ bill.amount }}</td>
+                    <td><span class="tag tag-warning">Unpaid</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-title">No open bills</p>
+        <p class="empty-copy">Great! No outstanding bills right now.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card quick-actions">
+    <div class="card-header">
+        <h2 class="card-title">Quick Actions</h2>
+    </div>
+    <div class="quick-actions">
+        <a href="{% url 'adminportal:customer_create' %}" class="btn btn-primary">➕ Add Customer</a>
+        <a href="{% url 'adminportal:bill_create' %}" class="btn btn-secondary">🧾 Assign Bill</a>
+        <a href="{% url 'adminportal:subscription_create' %}" class="btn btn-secondary">🔁 Create Subscription</a>
+        <a href="{% url 'customerportal:dashboard' %}" class="btn btn-secondary">🔍 View Customer Portal</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Latest Bills</h2>
+    </div>
+    {% if recent_bills %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Created</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in recent_bills %}
+                <tr>
+                    <td><a href="{% url 'adminportal:customer_detail' bill.user.id %}">{{ bill.user.username }}</a></td>
+                    <td>{{ bill.title }}</td>
+                    <td>{{ bill.get_bill_type_display }}</td>
+                    <td>{{ bill.created_at|date:'d M Y' }}</td>
+                    <td>
+                        {% if bill.status == 'paid' %}
+                            <span class="tag tag-success">Paid</span>
+                        {% else %}
+                            <span class="tag tag-warning">Unpaid</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-title">No bills created</p>
+        <p class="empty-copy">Create a bill to see it appear in this feed.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Recent Transactions</h2>
+    </div>
+    {% if recent_transactions %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Bill</th>
+                    <th>Amount (₹)</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in recent_transactions %}
+                <tr>
+                    <td>{{ txn.payment_date|date:'d M Y H:i' }}</td>
+                    <td><a href="{% url 'adminportal:customer_detail' txn.user.id %}">{{ txn.user.username }}</a></td>
+                    <td>{{ txn.bill.title }}</td>
+                    <td>{{ txn.amount }}</td>
+                    <td>{{ txn.method }}</td>
+                    <td>
+                        {% if txn.status == 'success' %}
+                            <span class="tag tag-success">{{ txn.get_status_display }}</span>
+                        {% else %}
+                            <span class="tag tag-warning">{{ txn.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-title">No transactions yet</p>
+        <p class="empty-copy">Transactions will appear here as soon as customers begin paying.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Subscription Status</h2>
+        <a href="{% url 'adminportal:subscription_create' %}" class="btn btn-secondary">Create Subscription</a>
+    </div>
+    {% if subscription_stats %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Subscriptions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in subscription_stats %}
+                <tr>
+                    <td>
+                        {% if stat.active %}
+                            <span class="tag tag-success">Active</span>
+                        {% else %}
+                            <span class="tag">Paused</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ stat.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="empty-title">No subscriptions yet</p>
+        <p class="empty-copy">Use “Create Subscription” to set up recurring billing.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
